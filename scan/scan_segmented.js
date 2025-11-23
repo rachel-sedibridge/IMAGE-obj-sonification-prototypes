@@ -12,33 +12,33 @@ ASSUMPTIONS:
 const MOVE_UP = 'ArrowUp';
 const MOVE_DOWN = 'ArrowDown';
 const TOGGLE_PLAY = ' '; //space
-var NUM_SEGMENTS = 4;
-var LOOPS = true;
+var NUM_SEGMENTS = 4; //int, number of segments to divide the sonification into
+var LOOPS = true; //bool, whether each segment loops or just plays once
 
-// start, end pings - constant
-const START_PING = 'audio_tracks/start.mp3' //segment 0
-const END_PING = 'audio_tracks/end.mp3' //segment NUM_SEGMENTS + 1
+// start, end tones - constant
+const START_TONE = 'audio_tracks/start.mp3' //segment 0
+const END_TONE = 'audio_tracks/end.mp3' //segment NUM_SEGMENTS + 1
 
 // region tracks (rendered and example versions) - example-specific
-const sky_real_ping = 'audio_tracks/sky-truelen-mono-w.mp3'
-const water_real_ping = 'audio_tracks/water-truelen-mono-w.mp3'
-const animal_real_ping = 'audio_tracks/animal-truelen-mono-w.mp3'
-const ground_real_ping = 'audio_tracks/ground-truelen-mono-w.mp3'
+const sky_real_tone = 'audio_tracks/sky-truelen-mono-w.mp3'
+const water_real_tone = 'audio_tracks/water-truelen-mono-w.mp3'
+const animal_real_tone = 'audio_tracks/animal-truelen-mono-w.mp3'
+const ground_real_tone = 'audio_tracks/ground-truelen-mono-w.mp3'
 
 // NOTE: example tones have not had the panning from the source clip removed
-const sky_eg_ping = 'audio_tracks/example_tone-sky_wind.mp3'
-const water_eg_ping = 'audio_tracks/example_tone-water_lake.mp3'
-const animal_eg_ping = 'audio_tracks/example_tone-animal_gallop.mp3'
-const ground_eg_ping = 'audio_tracks/example_tone-ground_rocks.mp3'
+const sky_eg_tone = 'audio_tracks/example_tone-sky_wind.mp3'
+const water_eg_tone = 'audio_tracks/example_tone-water_lake.mp3'
+const animal_eg_tone = 'audio_tracks/example_tone-animal_gallop.mp3'
+const ground_eg_tone = 'audio_tracks/example_tone-ground_rocks.mp3'
 
 // region mapper - example-specific
 // NOTE: the 'true' refers to checkbox.checked, keeping compatibility w/
 // reintroducing that "select regions to play" feature later
 var regions_to_play = {
-  sky: [sky_real_ping, true],
-  water: [water_real_ping, true],
-  animal: [animal_real_ping, true],
-  ground: [ground_real_ping, true]
+  sky: [sky_real_tone, true],
+  water: [water_real_tone, true],
+  animal: [animal_real_tone, true],
+  ground: [ground_real_tone, true]
 }
 var players = [];
 var sgmt_tracker = 0; //start at 'start' = 0
@@ -62,8 +62,8 @@ for (const [region, attrs] of Object.entries(regions_to_play)) {
 }
 // init start and end tone Player objs
 // unsynced w/ TransportTime rn...
-const startPlayer = new Tone.Player(START_PING).toDestination();
-const endPlayer = new Tone.Player(END_PING).toDestination();
+const startPlayer = new Tone.Player(START_TONE).toDestination();
+const endPlayer = new Tone.Player(END_TONE).toDestination();
 
 
 // KEYBINDINGS
@@ -111,12 +111,12 @@ function sonify(movingUp, repeating = false) {
           || (sgmt_tracker <= NUM_SEGMENTS && movingUp))) {
     movingUp ? sgmt_tracker++ : sgmt_tracker--;
   }
-  // START PING
+  // START TONE
   if (sgmt_tracker <= 0) {
     toggleMute(true);
     startPlayer.start();
   }
-  // END PING
+  // END TONE
   else if (sgmt_tracker > NUM_SEGMENTS) {
     toggleMute(true);
     endPlayer.start();
