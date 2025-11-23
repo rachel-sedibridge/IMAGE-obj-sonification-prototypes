@@ -6,6 +6,11 @@ This prototype just plays those audio clips (one per region) simultaeously and a
 For how to go about editing the sounds programmatically, the implementation of "echo" should give some ideas.
 
 
+# Dependencies
+- Tone.js v15.3.5 ([here](https://tonejs.github.io/))
+- KeyboardEvent API (built-in) (docs [here](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent))
+
+
 # Segmented
 This prototype has not implemented the more complex UI features implemented in the coninuous sound version: playing individual sounds on their own, and selecting specific regions to play in the sonification.
 
@@ -25,9 +30,36 @@ The URLs for the sound clips are also kept in variables at the top of the file. 
 Finally, there are a couple global variables that are referenced by several functions or across function calls, and using a global variable was simplest. These are:
 - `regions_to_play`: dict of `{[region name]: [ [audio file url], [selected?] ]}`. The last (`selected?`) is not currently used in this prototype, because it's for one of the UI features not implemented yet. It has been left in order to make it easier to implement those later.
 - `sgmt_tracker` (= 0): tracks which segment it's on. Starts at 0 ("start").
-- `PLAYERS`: array of the Tone.Player objects for all the regions.
+- `PLAYERS`: array of the `Tone.Player` objects for all the regions.
 
 ## Setup / Initialization
+On load, the script calls `initSounds()`. This goes through each entry in the `regions_to_play` dict, and if selected, creates a `Tone.Player` object for that region from the audio file URL. The `Player`'s name is set to the name of the region for easier debugging.
+
+If `LOOPS` is true (if each segment should loop continuously), it syncs the `Player` to the `TransportTime` and sets it to start at time 0.  **I FORGET WHY OOPS COME BACK TO THIS**
+
+It creates a `Tone.Channel` object (see [here](https://tonejs.github.io/docs/15.1.22/classes/Channel.html)) and connects the player to that, so that the "signal" goes through the Channel obj before going to output. This makes it easier to change the panning and volume on regions (`Player`s), or mute/solo them, independently of each other.
+
+All these `Player` objects are added to an array, which is returned at the end. In practice, that array is assigned to a global variable, accessed by multiple functions during playback.
+
+**NOTE**: Once selecting specific regions to put in the sonification is implemented, this function can be called every time that selection is changed (or every keydown after it's changed).
+
+**Why not use `Tone.Players`?** Tone.js has an object (`Players`) that combines multiple `Player` objects, similarly to the array used here. I didn't use it, because it's mainly useful if you're doing the same thing to all those `Player`s. Since here, we're specifically going to be doing *different* things to every `Player` (region), it didn't really add anything and was confusing.
+
+## Playback
+This uses the KeyboardEvent API to sync to user keybaord input, and Tone.js to play audio.
+
+### Handling user (keyboard) input
+There is an `EventListener` for "keydown" events of any kind, which immediately calls the function `handleDown()`. *NOTE: there is the outline to easily implement a response when the user lifts the key, but it's not currently used. Since we only care about individual keypresses here, keydown and keyup might as well be the same event.*
+
+The function `handleDown()` ignores all but the initial keydown (i.e. keydown events that keep being sent when a user holds down a key). It explicitly handles the three important keys (`MOVE_UP`, `MOVE_DOWN`, and `TOGGLE_PLAY`, defined above), and lets everything else just run through and return without doing anything.
+
+On `MOVE_UP` and `MOVE_DOWN`, it calls the `sonify()` helper function with a flag saying which one it was (boolean `movingUp`). On `TOGGLE_PLAY`, it either stops the sounds currently playing, or calls the same `sonify()` helper to resume. In the latter case, it throws in an optional flag (`repeating = true`) to indicate that this is replaying the current segment. See why below.
+
+#### NOTE - pausing playback
+As described in the Tone.js additional documentation (`documentation/tonejs.md`), you cannot simply "stop" or pause playback of something that's already scheduled into the `Transport`. This implementation works by setting all the `Players` (for each region) to play on a certain time interval. For this reason, the only way I could figure out to stop playback once it started was to go through and mute every `Player`, and then check and unmute if necessary before starting playback again. It's a hacky workaround, so if you come up with something better please go ahead and change it lol.
+
+### Playing a segment (`sonify()` helper)
+First, 
 
 
 # Continuous Sound
