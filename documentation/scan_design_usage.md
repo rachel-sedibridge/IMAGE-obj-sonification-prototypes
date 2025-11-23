@@ -1,3 +1,24 @@
+# Intro
+**This doc covers usage of this prototype and design considerations. For documentation of the technical side of things, see `documentation/scan_implementation.md`.**
+
+This design is meant to go alongside an alt-text description, like the spatialized audio in IMAGE as it exists at time of writing.
+
+This design plays with assigning real-life representational sounds to regions, as well as depicting height within the 2D projection of the picture. It maps the identified regions to a representational sound (e.g. waves on a lake for water-related sounds). It then "scans" up the picture from bottom to top, and the sound for each region appears, disappears, and grows lounder or quieter in the sonification where that region takes up more or less space in the picture.
+
+Put another way, each of the regions detected in an image has an associated sound. Imagine a bar scanning over the image from bottom to top: the sound of a region plays when that region is present under that bar. The volume of the sound is proportional to how much of image it takes up under the bar.
+&nbsp;&nbsp;&nbsp;&nbsp;e.g. If the sound for "water" and the sound for "rock" are playing at equal volumes, the image at that height is about half water and half rock.
+&nbsp;&nbsp;&nbsp;&nbsp;e.g. If a sound plays for the first quarter of the total sonification and then disappears, that region is only present in the bottom quarter of the image.
+
+[If that made no sense, imagine taking a very small horizontal slice of the bottom of a photo. Like, the bottom 2 rows of pixels. This sonification plays the sounds for the regions present in this slice, with volume proportional to how much of the slice they take up.]: #
+
+[&nbsp;&nbsp;&nbsp;&nbsp;e.g. If that slice contains entirely water, you will hear only the sound associated to "water".]: #
+[&nbsp;&nbsp;&nbsp;&nbsp;e.g. If that slice is 67% "field" and 33% "forest", you will hear the sounds for both those regions, with "field" sounding roughly twice as loud as "forest".]: #
+
+[Then, imagine looking at the next 2 rows of pixels and playing the sonification for that, then the next, and so on up to the top of the picture.]:  #
+
+*If you've ever played the demo for sheet music online and seen the line moving across it to track the place, that's where I got the idea. [Video example](https://www.youtube.com/watch?v=NWEVKyEwi4A&list=PLhkgFCE9DX4PplwDyQrNN_XTedppjjiry&index=1).*
+
+
 # Usage
 
 Set up a localhost however you want. The original static (non-interactive) prototype can be found at `scan/static_prototype`. For both interactive prototypes, pull up a localhost of `scan/scan.html`. The default version is the one that breaks the playback into sections. For the continuous playback, switch the \<script\> tag to point to `scan_continuous.js` (it points to `scan_segmented.js` by default).
@@ -48,6 +69,3 @@ Both of these use the keyboard. The assumption was that BLV users are likely mos
 
 ### Continuous playback prototype
 
-
-
-# Implementation
