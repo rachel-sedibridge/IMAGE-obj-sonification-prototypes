@@ -3,7 +3,7 @@
 
 /*
 ASSUMPTIONS:
-- actions are done on `players` together, so can check players[0] and assume
+- actions are done on `PLAYERS` together, so can check PLAYERS[0] and assume
   that holds for all of them
 */
 
@@ -14,10 +14,6 @@ const MOVE_DOWN = 'ArrowDown';
 const TOGGLE_PLAY = ' '; //space
 var NUM_SEGMENTS = 4; //int, number of segments to divide the sonification into
 var LOOPS = true; //bool, whether each segment loops or just plays once
-
-// start, end tones - constant
-const START_TONE = 'audio_tracks/start.mp3' //segment 0
-const END_TONE = 'audio_tracks/end.mp3' //segment NUM_SEGMENTS + 1
 
 // region tracks (rendered and example versions) - example-specific
 const sky_real_tone = 'audio_tracks/sky-truelen-mono-w.mp3'
@@ -31,6 +27,12 @@ const water_eg_tone = 'audio_tracks/example_tone-water_lake.mp3'
 const animal_eg_tone = 'audio_tracks/example_tone-animal_gallop.mp3'
 const ground_eg_tone = 'audio_tracks/example_tone-ground_rocks.mp3'
 
+// init start and end tone Player objs (unsynced w/ TransportTime)
+// "start" = segment 0
+const startPlayer = new Tone.Player('audio_tracks/start.mp3').toDestination();
+// "end" = segment NUM_SEGMENTS + 1
+const endPlayer = new Tone.Player('audio_tracks/end.mp3').toDestination();
+
 // region mapper - example-specific
 // NOTE: the 'true' refers to checkbox.checked, keeping compatibility w/
 // reintroducing that "select regions to play" feature later
@@ -40,30 +42,30 @@ var regions_to_play = {
   animal: [animal_real_tone, true],
   ground: [ground_real_tone, true]
 }
-var players = [];
 var sgmt_tracker = 0; //start at 'start' = 0
+const PLAYERS = initSounds();
 
 
-// SETUP
+// SETUP FUNCS
 // init Player and Channel objs for region tones
-for (const [region, attrs] of Object.entries(regions_to_play)) {
-  const channel = new Tone.Channel().toDestination();
-  const player = new Tone.Player({
-    url: attrs[0],
-    loop: true, // it breaks after 1 playthrough if this is not set
-  });
-  if (LOOPS) {
-    player.sync().start(0);
-  }
-  player.name = region; //set name to region name
-  player.connect(channel);
+function initSounds() {
+  var players = [];
+  for (const [region, attrs] of Object.entries(regions_to_play)) {
+    const channel = new Tone.Channel().toDestination();
+    const player = new Tone.Player({
+      url: attrs[0],
+      loop: true, // it breaks after 1 playthrough if this is not set
+    });
+    if (LOOPS) {
+      player.sync().start(0);
+    }
+    player.name = region; //set name to region name
+    player.connect(channel);
 
-  players.push(player); //maintain list of active players
+    players.push(player); //maintain list of active players
+  }
+  return players;
 }
-// init start and end tone Player objs
-// unsynced w/ TransportTime rn...
-const startPlayer = new Tone.Player(START_TONE).toDestination();
-const endPlayer = new Tone.Player(END_TONE).toDestination();
 
 
 // KEYBINDINGS
@@ -124,22 +126,22 @@ function sonify(movingUp, repeating = false) {
   // ACTUAL SONIFICATION - "REGIONS"
   else {
     toggleMute(false); //unmute, just in case last key was 'play/pause'
-    playRegions()
+    playRegions(sgmt_tracker)
   }
 }
 
-function playRegions() {
+function playRegions(sgmt_tracker) {
   // segment length (duration) computed here bc player buffers not init'ed right away
-  var duration = players[0].buffer.duration / NUM_SEGMENTS;
+  var duration = PLAYERS[0].buffer.duration / NUM_SEGMENTS;
   var offset = (sgmt_tracker - 1) * duration; //start playing from this point in the tracks
 
-  for (var i = 0; i < players.length; i++) {
+  for (var i = 0; i < PLAYERS.length; i++) {
     if (LOOPS) {
-      players[i].loopStart = offset;
-      players[i].loopEnd = offset + duration;
+      PLAYERS[i].loopStart = offset;
+      PLAYERS[i].loopEnd = offset + duration;
     }
     else {
-      players[i].start(0, offset, duration); //start playback as soon as indicated
+      PLAYERS[i].start(0, offset, duration); //start playback as soon as indicated
     }
   }
   Tone.getTransport().start(); //start playback
@@ -150,9 +152,9 @@ function playRegions() {
 }
 
 function toggleMute(targetSetting) {
-  if (players[0].mute != targetSetting) {
-    for (var i = 0; i < players.length; i++) {
-      players[i].mute = targetSetting;
+  if (PLAYERS[0].mute != targetSetting) {
+    for (var i = 0; i < PLAYERS.length; i++) {
+      PLAYERS[i].mute = targetSetting;
     }
   }
 }
