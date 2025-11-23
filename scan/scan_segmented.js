@@ -54,7 +54,6 @@ function initSounds() {
     if (!attrs[1]) { //if not selected for play, skip
       continue;
     }
-    const channel = new Tone.Channel().toDestination();
     const player = new Tone.Player({
       url: attrs[0],
       loop: true, // it breaks after 1 playthrough if this is not set
@@ -63,6 +62,8 @@ function initSounds() {
       player.sync().start(0);
     }
     player.name = region; //set name to region name
+
+    const channel = new Tone.Channel().toDestination();
     player.connect(channel);
 
     players.push(player); //maintain list of active players
