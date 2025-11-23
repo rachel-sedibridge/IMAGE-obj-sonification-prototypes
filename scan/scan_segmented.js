@@ -51,6 +51,9 @@ const PLAYERS = initSounds();
 function initSounds() {
   var players = [];
   for (const [region, attrs] of Object.entries(regions_to_play)) {
+    if (!attrs[1]) { //if not selected for play, skip
+      continue;
+    }
     const channel = new Tone.Channel().toDestination();
     const player = new Tone.Player({
       url: attrs[0],
