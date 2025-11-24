@@ -115,19 +115,19 @@ function handleDown(e) {
       return;
     }
     if (Tone.TransportTime().valueOf() >= players[0].buffer.duration) {
-      console.log('STOP - REPEAET @')
+      console.log('STOP - REPEAT 2')
       Tone.getTransport().stop();
     }
   } 
   else if (e.key == triggerUp) { //initial press, scanning up
-    sonify(false);
+    sonify(true);
   } 
   else if (e.key == triggerDown) { //initial press, scanning down
-    sonify(true);
+    sonify(false);
   }
 }
 
-function sonify(isBackwards) {
+function sonify(movingUp) {
   console.log(Tone.getTransport().state)
   // make sure tracks are playing in the correct direction (forwards for up, vice versa)
   // can check one instead of all, bc either all tracks are reversed or none are.
@@ -139,9 +139,9 @@ function sonify(isBackwards) {
     }
   }
   // entered when changing direction from previous keypress
-  if (players[0].reverse !== isBackwards) {
+  if (players[0].reverse !== movingUp) {
     for (var i = 0; i < players.length; i++) {
-      players[i].reverse = isBackwards;
+      players[i].reverse = movingUp;
     }
     reverseEvent.start();
   }
