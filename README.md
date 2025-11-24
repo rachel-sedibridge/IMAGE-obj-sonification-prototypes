@@ -106,3 +106,5 @@ Controls (repeated in instructions):
 - reduce the number of global vars esp. in the "scan" prototypes
 - versions of all prototypes w/ more pictures
 - implement UI features for `scan_segmented`
+- `scan_continous` backwards playback start from the correct point in track
+- clean up `scan/scan_continuous.js`
