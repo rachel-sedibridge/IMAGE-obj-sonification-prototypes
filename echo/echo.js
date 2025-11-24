@@ -28,8 +28,8 @@ DEPENDENCIES:
 // FILE-GLOBAL VARS
 // sonification generation URLs
 const D_URL = 'clean_d_str_pick.mp3';
-// const schema_url = "json_schemas/city_street.json"
-const schema_url = "json_schemas/test.json"
+const schema_url = "json_schemas/city_street.json"
+// const schema_url = "json_schemas/test.json"
 
 // keybinds
 const TOGGLE_PLAY = ' '; //key to toggle play/pause
