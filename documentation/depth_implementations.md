@@ -71,6 +71,9 @@ f(x) = \begin{cases}
     <img src="cutoff_freq_curve-desmos-pw.png" height="500" alt="Graph of depth vs cutoff frequency, screenshotted from Desmos.com">
 </div>
 
+### Echo delay time
+The amount of time before the echo sounds is calculated by normalizing the depth value to a different range, in seconds. The range [0.01, 3] was selected, where the echo begins 0.01 seconds after the main tone does, if depth = 0. This was because, when an object is in the extreme foreground, it shouldn't actually have an echo that sounds very far away. This timing prevents the signals from interfering, but they still overlap enough that to most people it would sound like one sound.
+
 
 ## Multiple Echoes (`echo_multiple.js`) - superseded
 
