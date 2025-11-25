@@ -130,13 +130,9 @@ function handleDown(e) {
   }
   if (Tone.getTransport().state == "started") {
     Tone.getTransport().toggle();
-    // NOTE: this doesn't stop the playback once it's started, but
-    // it at least lets you play it again.
-    // TODO: make it stop playback once it's started
   }
   else {
     playAllTones();
-    // playbackTester();
   }
 }
 
@@ -157,23 +153,23 @@ function playTone(time, value) {
 
 // TEST/MISC
 // this holds my experimental messing around, you may disregard :)
-function playbackTester() {
-  const channel1 = new Tone.Channel({
-    pan: -0.25
-  });
-  const channel2 = new Tone.Channel({
-    pan: 1
-  });
+// function playbackTester() {
+//   const channel1 = new Tone.Channel({
+//     pan: -0.25
+//   });
+//   const channel2 = new Tone.Channel({
+//     pan: 1
+//   });
 
-  // basicTone.chain(channel1, Tone.getDestination());
-  // basicTone.triggerAttackRelease("D1", 0.5, 0);
-  // // basicTone.disconnect(channel1);
-  // // basicTone.toDestination()
+//   // basicTone.chain(channel1, Tone.getDestination());
+//   // basicTone.triggerAttackRelease("D1", 0.5, 0);
+//   // // basicTone.disconnect(channel1);
+//   // // basicTone.toDestination()
 
-  // basicTone.chain(channel2, Tone.getDestination());
-  // basicTone.triggerAttackRelease("D1", 0.5, 1);
-  // // basicTone.disconnect(channel2);
-}
+//   // basicTone.chain(channel2, Tone.getDestination());
+//   // basicTone.triggerAttackRelease("D1", 0.5, 1);
+//   // // basicTone.disconnect(channel2);
+// }
 
 // const basicTone = new Tone.Sampler({
 //   urls: {
