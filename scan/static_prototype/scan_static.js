@@ -1,27 +1,32 @@
-const start_ping = new Audio('audio_tracks/start.mp3')
-const stop_ping = new Audio('audio_tracks/stop.mp3')
+const start_ping = new Audio('../audio_tracks/start.mp3')
+const end_ping = new Audio('../audio_tracks/end.mp3')
 
-const sky_real_ping = new Audio('audio_tracks/sky-truelen-mono-w.mp3');
-const water_real_ping = new Audio('audio_tracks/water-truelen-mono-w.mp3');
-const animal_real_ping = new Audio('audio_tracks/animal-truelen-mono-w.mp3');
-const ground_real_ping = new Audio('audio_tracks/ground-truelen-mono-w.mp3');
+const sky_real_ping = new Audio('../audio_tracks/sky-truelen-mono-w.mp3');
+const water_real_ping = new Audio('../audio_tracks/water-truelen-mono-w.mp3');
+const animal_real_ping = new Audio('../audio_tracks/animal-truelen-mono-w.mp3');
+const ground_real_ping = new Audio('../audio_tracks/ground-truelen-mono-w.mp3');
 
-const sky_eg_ping = new Audio('audio_tracks/example_tone-sky_wind.mp3');
-const water_eg_ping = new Audio('audio_tracks/example_tone-water_lake.mp3');
-const animal_eg_ping = new Audio('audio_tracks/example_tone-animal_gallop.mp3');
-const ground_eg_ping = new Audio('audio_tracks/example_tone-ground_rocks.mp3');
+const sky_eg_ping = new Audio('../audio_tracks/example_tone-sky_wind.mp3');
+const water_eg_ping = new Audio('../audio_tracks/example_tone-water_lake.mp3');
+const animal_eg_ping = new Audio('../audio_tracks/example_tone-animal_gallop.mp3');
+const ground_eg_ping = new Audio('../audio_tracks/example_tone-ground_rocks.mp3');
 
 const sky_play_button = document.getElementById("sky-play-pause");
 const water_play_button = document.getElementById("water-play-pause");
 const animal_play_button = document.getElementById("animal-play-pause");
 const ground_play_button = document.getElementById("ground-play-pause");
 
-const sky_checkbox = document.getElementById("sky-checkbox");
-const water_checkbox = document.getElementById("water-checkbox");
-const animal_checkbox = document.getElementById("animal-checkbox");
-const ground_checkbox = document.getElementById("ground-checkbox");
+// const sky_checkbox = document.getElementById("sky-checkbox");
+// const water_checkbox = document.getElementById("water-checkbox");
+// const animal_checkbox = document.getElementById("animal-checkbox");
+// const ground_checkbox = document.getElementById("ground-checkbox");
 
-var regions_to_play = {}
+var regions_to_play = {
+  sky: [sky_real_ping, true],
+  water: [water_real_ping, true],
+  animal: [animal_real_ping, true],
+  ground: [ground_real_ping, true]
+}
 
 
 function updateRegionsToPlay() {
@@ -35,8 +40,7 @@ function updateRegionsToPlay() {
 
 // play the sonification, checked elements only
 function sonify() {
-  console.log("sonifying!")
-  updateRegionsToPlay()
+  // updateRegionsToPlay() //uncomment when this feature is added back in
   // if anything is playing, pause all
   if (
     (!sky_real_ping.paused && !sky_real_ping.ended)
@@ -49,15 +53,14 @@ function sonify() {
   }
   // else, play all checked
   else {
-    start_ping.addEventListener("ended", (e) => {
+    // start_ping.addEventListener("ended", (e) => {
       for (const [region, attrs] of Object.entries(regions_to_play)) {
         if (attrs[1]) { //is checked
           attrs[0].play() //AudioElement object
-          console.log(attrs[0])
         }
       }
-    })
-    start_ping.play()
+    // })
+    // start_ping.play()
     // regions_entries = Object.entries(regions_to_play)
     // any_sound = regions_entries[regions_entries.length - 1][1][0]
     // any_sound.addEventListener("ended", (e) => {
