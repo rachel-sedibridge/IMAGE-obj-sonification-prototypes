@@ -1,4 +1,4 @@
-// JEFF'S VARIATION ON ECHO: SONIFY TRAJECTORY OF BALL HITTING OBJECTS
+// JEFF'S VARIATION ON ECHO: SONIFY TRAJECTORY OF BALL HITTING OBJECTS (ANALOGY)
 
 /*
 IDEA:
@@ -17,7 +17,8 @@ DEPENDENCIES:
 
 // FILE-GLOBAL VARS
 // sonification generation URLs
-const D_URL = 'clean_d_str_pick.mp3';
+const D_URL = "clean_d_str_pick.mp3";
+const SECONDARY_URL = "tennis_ball_hit.mp3";
 const schema_url = "json_schemas/city_street.json"
 // const schema_url = "json_schemas/test.json"
 
@@ -60,7 +61,7 @@ function generateTonesFromObjects(data) {
     // secondary tone doesn't need to be Sampler, just easier if they're the same.
     // its pitch name is totally meaningless, just use same one as primary tone
     var secondary = new Tone.Sampler({
-        D1: "audio_tracks/tennis_ball_hit.mp3",
+        D1: "audio_tracks" + SECONDARY_URL,
     });
     // set 2D pan using x coordinate of centroid
     var panner = new Tone.Panner(normalizePanX(x));
