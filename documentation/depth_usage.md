@@ -70,6 +70,3 @@ If you want to test these prototypes on a different picture, create a JSON file 
 **This applies only to echo and duration prototypes** --- *not* multiple-echo.
 
 There is a "TONE SETUP FUNCTIONS" section, indicated by comments: in there, are several functions called `normalize_<effect>()`. See `./depth_technical.md` for more details, but they generally just remap the [0,1] depth value range from the schema to a new range specific to that effect, and the new maximum and minimum are variables in the function. **Change the values of those variables to change the range of possible degree for that effect** (e.g. range of seconds for the duration of the main tone, range of "wetness" of reverb on echo). The relative values for tones within the sonification will be preserved.
-<!--stackedit_data:
-eyJoaXN0b3J5IjpbLTc1OTc2MjczOF19
--->

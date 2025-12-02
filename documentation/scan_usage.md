@@ -84,7 +84,3 @@ const ground_eg_tone = 'audio_tracks/example_tone-ground_rocks.mp3'
 ```
 
 NOTE: the interactive prototypes still have the example tones linked, because I do/did plan to implement the full UI features for those, at which point they'll be needed again.
-<!--stackedit_data:
-eyJoaXN0b3J5IjpbLTc1MjM5MTM2MywtMjg1MDUzNTIzLC04Mz
-E1MzYwOTBdfQ==
--->
