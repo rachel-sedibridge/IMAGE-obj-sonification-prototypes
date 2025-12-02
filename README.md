@@ -116,3 +116,6 @@ Controls (repeated in instructions):
 - the start/stop in "echo" prototype makes the tones a little louder every time you pause: 3 pauses in and it's so loud the noise is breaking. No *clue* why, gotta fix that.
 - read out names (label tones) in depth_map prototypes
 - work out timing so that `toneEvents` doesn't need to be global var - `echo.js`, `thrown_ball.js`
+
+# License
+This project is licensed under the McGill SRL IMAGE contributor license agreement [here](https://github.com/Shared-Reality-Lab/IMAGE-server/blob/main/CLA.md).
