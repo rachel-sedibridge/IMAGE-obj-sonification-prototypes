@@ -20,7 +20,7 @@ There is **one html page for both interactive prototypes**: `/scan/scan.html`. B
 <!-- <script src="scan_continuous.js"></script> -->
 <!--UNCOMMENT LINE BELOW FOR "SEGMENTED" PROTOTYPE - default: -->
 <script src="scan_segmented.js"></script>
-  ```
+```
 
 All code for the static prototype is separate and in **its own subfolder: `scan/static_prototype/`**. The HTML page is `scan_static.html`, and is linked only to `scan_static.js` --- no configuration necessary.
 
@@ -33,6 +33,9 @@ For both interactive prototypes, the default controls to move "up" and "down" th
 Single press on up or down arrow moves you up or down a "segment". Spacebar stops and restarts playback on the current segment. 
 
 When you are on a segment, it will play on loop --- see below to disable looping --- until stopped (spacebar). If you are on the "start" or "end", a text-to-voice clip of the word "start" or "end" will play once, followed by silence until you interact again (up/down arrow, spacebar).
+
+**IMPORTANT**: You must have "selected" / "focused on" the page in order for the keybinds to work.
+	e.g. if you opened the console and have selected it so your cursor is flashing in the console, spacebar will type a space character in there instead of pausing the sonfication. Click anywhere on the webpage to refocus on it.
 
 ### Continuous
 Press and hold the up and down arrows to play "up" and "down" the image. Release the key to stop playback, press again to resume from the same point. Since releasing the key stops playback, there is no play/pause control.
@@ -82,5 +85,6 @@ const ground_eg_tone = 'audio_tracks/example_tone-ground_rocks.mp3'
 
 NOTE: the interactive prototypes still have the example tones linked, because I do/did plan to implement the full UI features for those, at which point they'll be needed again.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTI4NTA1MzUyMywtODMxNTM2MDkwXX0=
+eyJoaXN0b3J5IjpbLTc1MjM5MTM2MywtMjg1MDUzNTIzLC04Mz
+E1MzYwOTBdfQ==
 -->
