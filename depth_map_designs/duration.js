@@ -49,8 +49,8 @@ const schema_url = "json_schemas/city_street.json"
 const TOGGLE_PLAY = ' '; //key to toggle play/pause
 
 // sonification timing parameters
-const TONE_SPACING = 0.4; //in seconds, time between end of one tone and start of next
-const SECONDARY_DURATION = 0.15; //in seconds, how long the secondary tone lasts
+const TONE_SPACING = 0.3; //in seconds, time between end of one tone and start of next
+const SECONDARY_DURATION = 0.14; //in seconds, how long the secondary tone lasts
 
 var toneEvents = []; //list of tone event objs used in playback, populate during loading
 
@@ -88,11 +88,19 @@ function generateTonesFromObjects(data) {
     });
     // set 2D pan using x coordinate of centroid
     var panner = new Tone.Panner(normalizePanX(x));
-    // the secondary ("stop") tone I picked is pretty loud, bring it down to pull focus away
-    var volume = new Tone.Volume(-14)
-    // apply those effects to the echo, and the panning to both
-    primary.chain(panner, Tone.Destination);
-    secondary.chain(volume, panner, Tone.Destination);
+    // apply those effects to the echo. Only add panning to primary if
+    // playing tone individually.
+    if (GROUP_TONES) {
+      // reduce secondary tone volume only by a little bit, because it is important now
+      // but it is really kinda loud
+      var volume = new Tone.Volume(-2);
+      primary.connect(Tone.getDestination())
+    } else {
+      // the secondary ("stop") tone I picked is pretty loud, bring it down to pull focus away
+      var volume = new Tone.Volume(-14);
+      primary.chain(panner, Tone.getDestination());
+    }
+    secondary.chain(volume, panner, Tone.getDestination());
   
     // save essential info in an event array that can be passed to Part or Sequence
     toneEvents.push({
@@ -158,14 +166,24 @@ function groupToneEvents() {
     const cat_objs = toneEvents.filter((obj) => obj.category == category);
     newToneEvents.push({
       catName: category,
-      primaryTones: cat_objs.map((obj) => obj.primaryTone),
+      primaryTone: cat_objs.map((obj) => obj.primaryTone)[0], //only use the 1st primary tone!
+      primaryDuration: Math.max(...cat_objs.map((obj) => obj.offset)),
       secondaryTones: cat_objs.map((obj) => obj.secondaryTone),
       offsets: cat_objs.map((obj) => obj.offset),
-      time: Math.min(...cat_objs.map((obj) => obj.time))
+      time: 0 // set start time later!
     })
   }
 
   return newToneEvents;
+}
+
+// set start times for primary tones when tones are grouped by category
+function setGroupStartTimes(toneArray) {
+  var curTime = 0;
+  for (var i = 0; i < toneArray.length; i++) {
+    toneArray[i].time = curTime; //0 when i = 0
+    curTime = curTime + toneArray[i].primaryDuration + SECONDARY_DURATION + TONE_SPACING;
+  }
 }
 
 
@@ -183,7 +201,9 @@ function handleDown(e) {
   else {
     // play all the tones in sequence, without narration so far
     if (GROUP_TONES) {
-      const tonePart = new Tone.Part(playToneGroup, groupToneEvents()).start(0);
+      const events = groupToneEvents();
+      setGroupStartTimes(events);
+      const tonePart = new Tone.Part(playToneGroup, events).start(0);
     } else {
       const tonePart = new Tone.Part(playTone, toneEvents).start(0);
     }
@@ -202,8 +222,8 @@ function playTone(time, value) {
 // callback for the Tone.Part that plays tones: tones grouped by semantic category
 function playToneGroup(time, value) {
   // value contains `catName` for the 'captioning', not implemented yet
-  for (var i = 0; i < value.primaryTones.length; i++) {
-    value.primaryTones[i].triggerAttackRelease("D1", value.offsets[i], time);
+  value.primaryTone.triggerAttackRelease("D1", value.primaryDuration, time);
+  for (var i = 0; i < value.secondaryTones.length; i++) {
     value.secondaryTones[i].triggerAttackRelease("D1", SECONDARY_DURATION, time + value.offsets[i])
   }
 }
