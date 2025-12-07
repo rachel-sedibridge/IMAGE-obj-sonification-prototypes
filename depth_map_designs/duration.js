@@ -13,9 +13,32 @@ DEPENDENCIES:
 - Tone.js v15.1.22 (any v15 would work)
 - KeyboardEvents API (https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent)
 - https://github.com/Shared-Reality-Lab/IMAGE-server/blob/2945b52da77bf74b1307e7e2286c6297ebef6157/preprocessors/object-detection.schema.json
+
+schema - toneEvents, ungrouped:
+list of objects w/ this schema...
+{
+  "name" (string): name of the object (not currently used),
+  "primaryTone"(Sampler): the main tone generator,
+  "secondaryTone" (Sampler): the echo tone generator,
+  "offset" (number): number of seconds b/w start of main tone and start of echo tone,
+  "time" (TransportTime): start time of the main tone for this object
+}
+schema - toneEvents, grouped:
+list of objects w/ this schema...
+{
+  "name" (string): name of the semantic category (not currently used),
+  "primaryTones"(Sampler list): the main tone generators,
+  "secondaryTones" (Sampler list): the echo tone generators,
+  "offset" (number list): number of seconds b/w start of main tone and start of echo tones,
+  "time" (TransportTime): start time of the main tones for this object
+}
 */
 
 // FILE-GLOBAL VARS
+// version control -- TODO: make this and `echo.js` one file, controlled here
+// T to play tones in one semantic category at once, F to play tones individually
+const GROUP_TONES = true;
+
 // sonification generation URLs
 const D_URL = "clean_d_str_pick.mp3";
 const SECONDARY_URL = "tennis_ball_hit.mp3";
@@ -26,8 +49,8 @@ const schema_url = "json_schemas/city_street.json"
 const TOGGLE_PLAY = ' '; //key to toggle play/pause
 
 // sonification timing parameters
-const TONE_SPACING = 0.5; //in seconds, time between end of one tone and start of next
-const SECONDARY_DURATION = 0.3; //in seconds, how long the secondary tone lasts
+const TONE_SPACING = 0.4; //in seconds, time between end of one tone and start of next
+const SECONDARY_DURATION = 0.15; //in seconds, how long the secondary tone lasts
 
 var toneEvents = []; //list of tone event objs used in playback, populate during loading
 
@@ -61,7 +84,7 @@ function generateTonesFromObjects(data) {
     // secondary tone doesn't need to be Sampler, just easier if they're the same.
     // its pitch name is totally meaningless, just use same one as primary tone
     var secondary = new Tone.Sampler({
-        D1: "audio_tracks" + SECONDARY_URL,
+        D1: "audio_tracks/" + SECONDARY_URL,
     });
     // set 2D pan using x coordinate of centroid
     var panner = new Tone.Panner(normalizePanX(x));
@@ -74,6 +97,7 @@ function generateTonesFromObjects(data) {
     // save essential info in an event array that can be passed to Part or Sequence
     toneEvents.push({
       name: objName,
+      category: obj.type,
       primaryTone: primary,
       secondaryTone: secondary,
       offset: normalizeDepthToTime(depth),
@@ -95,7 +119,7 @@ function normalizePanX(x) {
 function normalizeDepthToTime(depth) {
   // [0,1] -> [c,d] : f(t) = c + (d-c/1-0) * (t - 0)
   var delay_min = 0.3; //seconds when depth = 0
-  var delay_max = 3; //seconds when depth = 1
+  var delay_max = 2; //seconds when depth = 1
   return delay_min + (delay_max - delay_min) * depth; //linear
 }
 
@@ -120,6 +144,30 @@ function setStartTimes() {
   }
 }
 
+// convert toneEvents array to the right format for grouping
+function groupToneEvents() {
+  var newToneEvents = [];
+
+  // for every element of toneEvents, check its category
+  for (var category of toneEvents.map((x) => x.category)) {
+    // if it's one we've already dealth with, skip
+    if (newToneEvents.map((obj) => obj.catName).includes(category)) {
+      continue;
+    }
+    // else, get *all elements* of toneEvents that are of that category
+    const cat_objs = toneEvents.filter((obj) => obj.category == category);
+    newToneEvents.push({
+      catName: category,
+      primaryTones: cat_objs.map((obj) => obj.primaryTone),
+      secondaryTones: cat_objs.map((obj) => obj.secondaryTone),
+      offsets: cat_objs.map((obj) => obj.offset),
+      time: Math.min(...cat_objs.map((obj) => obj.time))
+    })
+  }
+
+  return newToneEvents;
+}
+
 
 // KEYBINDINGS / PLAYBACK
 document.addEventListener('keydown', handleDown);
@@ -134,17 +182,30 @@ function handleDown(e) {
   }
   else {
     // play all the tones in sequence, without narration so far
-    const tonePart = new Tone.Part(playTone, toneEvents).start(0);
+    if (GROUP_TONES) {
+      const tonePart = new Tone.Part(playToneGroup, groupToneEvents()).start(0);
+    } else {
+      const tonePart = new Tone.Part(playTone, toneEvents).start(0);
+    }
     Tone.getTransport().start();
   }
 }
 
-// the callback for the Tone.Part that plays all the tones
+// callback for the Tone.Part that plays tones: tones play individually
 // args MUST be (time, value) (API requirement)
 function playTone(time, value) {
   // value contains `name` for the 'captioning', not implemented yet
   value.primaryTone.triggerAttackRelease("D1", value.offset, time);
   value.secondaryTone.triggerAttackRelease("D1", SECONDARY_DURATION, time + value.offset);
+}
+
+// callback for the Tone.Part that plays tones: tones grouped by semantic category
+function playToneGroup(time, value) {
+  // value contains `catName` for the 'captioning', not implemented yet
+  for (var i = 0; i < value.primaryTones.length; i++) {
+    value.primaryTones[i].triggerAttackRelease("D1", value.offsets[i], time);
+    value.secondaryTones[i].triggerAttackRelease("D1", SECONDARY_DURATION, time + value.offsets[i])
+  }
 }
 
 
