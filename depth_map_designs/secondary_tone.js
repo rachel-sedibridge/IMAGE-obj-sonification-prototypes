@@ -1,4 +1,4 @@
-// JEFF'S VARIATION ON ECHO: SONIFY TRAJECTORY OF BALL HITTING OBJECTS (ANALOGY)
+// PRIMARY TONE FOR GROUNDING + SECONDARY TONE W/ 3D SPATIALIZATION INFO
 
 /*
 IDEA:
@@ -35,9 +35,13 @@ list of objects w/ this schema...
 */
 
 // FILE-GLOBAL VARS
-// version control -- TODO: make this and `echo.js` one file, controlled here
+// version control
 // T to play tones in one semantic category at once, F to play tones individually
 const GROUP_TONES = true;
+// T to put the 'distancing' effects on the secondary tones so they sound like
+// echoes, F to have just the raw sound in the secondary tone.
+const ECHOLOCATION_MODE = true;
+
 
 // sonification generation URLs
 const D_URL = "clean_d_str_pick.mp3";
@@ -91,14 +95,24 @@ function generateTonesFromObjects(data) {
     var secondary = new Tone.Sampler({
         D1: "audio_tracks/" + SECONDARY_URL,
     });
-    // set 2D pan using x coordinate of centroid
-    var panner = new Tone.Panner(normalizePanX(x));
-    // the secondary ("stop") tone I picked is pretty loud, bring it down to pull focus away
-    var volume = new Tone.Volume(-14);
-    // apply those effects to the echo. Only add panning to primary if
-    // playing tone individually.
-    primary.chain(panner, Tone.getDestination());
-    secondary.chain(volume, panner, Tone.getDestination());
+    // Set 2D pan using x coordinate of centroid. It gets sent to destination
+    // automatically because it's always the last thing in the chain regardless
+    // of other effects.
+    var panner = new Tone.Panner(normalizePanX(x)).toDestination();
+
+    // Add only the panning effect to the primary tone.
+    primary.connect(panner);
+
+    // Apply panning and additional effects to the secondary tone, additional
+    // effects depending on mode (echolocation vs duration-only).
+    if (ECHOLOCATION_MODE) {
+      const echo_effects = createEcholocationEffects(depth);
+      secondary.chain(echo_effects[0], echo_effects[1], panner);
+    } else { // duration-only mode
+      // the secondary tone is pretty loud, reduce vol to pull focus away
+      const volume = new Tone.Volume(-14);
+      secondary.chain(volume, panner, Tone.getDestination());
+    }
   
     // save essential info in an event array that can be passed to Part or Sequence
     toneEvents.push({
@@ -152,15 +166,24 @@ function generateToneGroupsFromObjects(data) {
       // Create the secondary (object-specific) tone for this group. Reduce
       // the volume bc the sound I grabbed for this is kinda loud.
       var secondary = new Tone.Sampler({
-        urls: { D1: "audio_tracks/" + SECONDARY_URL },
-        volume: -2
+        urls: { D1: "audio_tracks/" + SECONDARY_URL }
       });
       // Get the pan for this object, using x coordinate of centroid.
       const pan = normalizePanX(x);
       // Create the panner object for the secondary tone and connect it.
-      const panner = new Tone.Panner(pan);
-      secondary.chain(panner, Tone.getDestination());
-    
+      // Panner gets sent to destination automatically because it's always
+      // the last thing in the chain regardless of other effects.
+      const panner = new Tone.Panner(pan).toDestination();
+
+      // Connect panning to secondary tone, along with additional effects
+      // as mode (echo vs duration-only) demands.
+      if (ECHOLOCATION_MODE) {
+        const echo_effects = createEcholocationEffects(depth);
+        secondary.chain(echo_effects[0], echo_effects[1], panner);
+      } else { // duration-only mode
+        secondary.connect(panner);
+      }
+
       // Add this tone and it's depth-based offset to the lists.
       secondaryTones.push(secondary);
       offsets.push(normalizeDepthToTime(depth));
@@ -189,6 +212,21 @@ function setGroupStartTimes(tonesArray) {
   }
 }
 
+// Create the effects that are specific to "echolocation" mode, i.e. the
+// effects designed to make the secondary tone sound far away. Return them.
+function createEcholocationEffects(depth) {
+  var r_decay, r_wet = normalizeDepthToReverb(depth);
+  var reverb = new Tone.Reverb({
+    decay: r_decay,
+    wet: r_wet
+  });
+  var lowPassFilter = new Tone.Filter({
+    type: "lowpass",
+    frequency: normalizeDepthToFilter(depth)
+  });
+  return [reverb, lowPassFilter];
+}
+
 // normalize from centroid x coord on [0, 1] to Tone.Panner input on [-1, 1]
 function normalizePanX(x) {
   // function for this in the comment block at the top of the file
@@ -203,7 +241,32 @@ function normalizeDepthToTime(depth) {
   return delay_min + (delay_max - delay_min) * depth; //linear
 }
 
-// LEAVING THIS IN CASE IT BECOMES USEFUL
+// get the params for reverb (`decay`, `wet`) from obj depth num [0,1]
+function normalizeDepthToReverb(depth) {
+  var decay_min = 0.5; //seconds, when depth = 0
+  var decay_max = 5; //seconds, when depth = 1
+  var decay = decay_min + (decay_max - decay_min) * depth;
+
+  var wet_min = 0.5; //wet-dry balance when depth = 0
+  var wet_max = 0.96; //wet-dry balance when depth = 1
+  var wet = wet_min + (wet_max - wet_min) * depth;
+
+  return decay, wet;
+}
+
+// get the cutoff frequency of the low pass filter from obj depth num [0,1]
+function normalizeDepthToFilter(depth) {
+  // I went on desmos until I got a func that looked the right shape... see docs
+  var freq_min = 1050; //Hz when depth = 0
+  var freq = freq_min + Math.pow((-9 * depth + 9.5), 3.5);
+  // ^sets max cutoff ~3600, but want no discernible EQ on extremely close objs
+  if (depth < 0.05) {
+    freq = 6000
+  }
+  return freq;
+}
+
+// // LEAVING THIS IN CASE IT BECOMES USEFUL
 // // get volume reduction of secondary tone in decibels, from depth [0,1]
 // // NOTE: this is not meant to be meaningful, but rather to blend the secondary
 // //       tone into the end of the primary tone as it decays, and avoid confusion
