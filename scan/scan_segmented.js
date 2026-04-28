@@ -185,3 +185,62 @@ function toggleText() {
     text.style.display = "none";
   }
 }
+
+
+// ADDITIONAL FEATURES
+// make players for single renders (eg_tones)
+const player_sky_eg = new Tone.Player({
+    url: sky_eg_tone,
+    loop: false,
+  }).toDestination();
+player_sky_eg.name = "sky_eg";
+const player_water_eg = new Tone.Player({
+    url: water_eg_tone,
+    loop: false,
+  }).toDestination();
+player_water_eg.name = "water_eg";
+const player_animal_eg = new Tone.Player({
+    url: animal_eg_tone,
+    loop: false,
+  }).toDestination();
+player_animal_eg.name = "animal_eg";
+const player_ground_eg = new Tone.Player({
+    url: ground_eg_tone,
+    loop: false,
+  }).toDestination();
+player_ground_eg.name = "ground_eg";
+const eg_players = [player_sky_eg, player_water_eg, player_animal_eg, player_ground_eg]
+
+// play a single render
+// NO ABILITY TO PAUSE (YET)
+function playSingleRegion(region) {
+  for (var i = 0; i < eg_players.length; i++) {
+    if (eg_players[i].name.includes(region)) {
+      // play sound for 4 seconds
+      eg_players[i].start(0, 0, 4);
+    }
+  }
+}
+
+function pickRegionEgTone(region) {
+  if (region.includes("sky")) {
+    return sky_eg_tone;
+  } else if (region.includes("water")) {
+    return water_eg_tone;
+  } else if (region.includes("animal")) {
+    return animal_eg_tone;
+  } else if (region.includes("ground")) {
+    return ground_eg_tone;
+  }
+}
+
+// change number of segments
+function getUserInputSegments() {
+  var new_num_sgmts = document.getElementById("num-segments").value;
+  NUM_SEGMENTS = parseInt(new_num_sgmts, 10);
+}
+
+// toggle looping
+function toggleLoops() {
+  LOOPS = !LOOPS;
+}

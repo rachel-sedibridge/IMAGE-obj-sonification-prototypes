@@ -33,17 +33,17 @@ greyscale with strong light and dark contrast."><br/> -->
 </div> -->
 
 <div>
-  <h5>Play individual sounds - DOES NOT WORK</h5>
-  <button type="button" id="sky-play-pause" value="Sky">
+  <h5>Play individual sounds</h5>
+  <button type="button" id="sky-play-pause" value="Sky" onclick="playSingleRegion('sky')">
     <i class="fas fa-play small-play-icon"></i> Sky
   </button><br>
-  <button type="button" id="water-play-pause">
+  <button type="button" id="water-play-pause" onclick="playSingleRegion('water')">
     <i class="fas fa-play small-play-icon"></i> Water
   </button><br>
-  <button type="button" id="animal-play-pause">
+  <button type="button" id="animal-play-pause" onclick="playSingleRegion('animal')">
     <i class="fas fa-play small-play-icon"></i> Animal
   </button><br>
-  <button type="button" id="ground-play-pause">
+  <button type="button" id="ground-play-pause" onclick="playSingleRegion('ground')">
     <i class="fas fa-play small-play-icon"></i> Ground
   </button><br>
 </div>
@@ -52,7 +52,7 @@ greyscale with strong light and dark contrast."><br/> -->
 <div>
   <h5>Select parts of sonification - DOES NOT WORK</h5>
   <form id="regions-to-play-toggle">
-    <input type="radio" name="regions-to-play" id="play-all" onclick="toggleRegionSelect()" value="Play all regions">Play all regions
+    <input type="radio" name="regions-to-play" id="play-all" onclick="toggleRegionSelect()" value="Play all regions" checked="checked">Play all regions
     <input type="radio" name="regions-to-play" id="play-selected" onclick="toggleRegionSelect()" value="Play selected regions">Play selected regions only
   </form>
 
@@ -68,6 +68,21 @@ greyscale with strong light and dark contrast."><br/> -->
       <label for="ground-checkbox">Ground</label>
     </fieldset>
   </form>
+</div>
+
+
+<div>
+  <br>
+  <label for="num-segments">Select number of segments</h5>
+  <input type="text" id="num-segments">
+  <button onclick="getUserInputSegments()">OK</button>
+</div>
+
+
+<div>
+  <br>
+  <!-- <label for="loop-toggle">Toggle segment looping</label> -->
+  <button type="button" id="loop-toggle" onclick="toggleLoops()">Toggle segment looping</button>
 </div>
 
 
